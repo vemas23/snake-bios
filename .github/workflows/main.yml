@@ -2,8 +2,8 @@ name: Build and Release Snake BIOS
 
 on:
   push:
-    branches:
-      - 'main'  
+    tags:
+      - '*'  # Runs only when a tag is pushed
   workflow_dispatch:
 
 jobs:
@@ -14,11 +14,17 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Install NASM
-      run: sudo apt-get install -y nasm
+    - name: Install dependencies
+      run: sudo apt-get install -y nasm xorriso
 
     - name: Compile BIOS
       run: nasm bios.asm -o snake.raw
+
+    - name: Create ISO
+      run: |
+        mkdir -p iso_root
+        cp snake.raw iso_root/snake.raw
+        xorriso -as mkisofs -o snake.iso iso_root
 
     - name: Create Release
       id: create_release
@@ -31,7 +37,7 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
+    - name: Upload BIOS Raw File
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -39,4 +45,14 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: snake.raw
         asset_name: snake.raw
+        asset_content_type: application/octet-stream
+
+    - name: Upload ISO File
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: snake.iso
+        asset_name: snake.iso
         asset_content_type: application/octet-stream
