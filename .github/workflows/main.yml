@@ -2,8 +2,7 @@ name: Build and Release Snake BIOS
 
 on:
   push:
-    tags:
-      - 'v*.*.*'
+  workflow_dispatch:
 
 jobs:
   build:
