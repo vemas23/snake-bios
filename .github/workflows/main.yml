@@ -2,6 +2,8 @@ name: Build and Release Snake BIOS
 
 on:
   push:
+    branches:
+      - 'main'  
   workflow_dispatch:
 
 jobs:
@@ -13,7 +15,7 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install NASM
-      run: sudo apt-get install nasm
+      run: sudo apt-get install -y nasm
 
     - name: Compile BIOS
       run: nasm bios.asm -o snake.raw
@@ -24,8 +26,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
         draft: false
         prerelease: false
 
